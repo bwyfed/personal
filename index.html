@@ -1,0 +1,300 @@
+<style>
+html,body {
+	margin: 0;
+	padding: 0;
+}
+ #rect1 {
+	width: 200px;
+	height: 200px;
+	background-color: red;
+	border: 1px solid black;
+	transition: transform 1.5s;
+ }
+ #rect1:hover {
+	transform: matrix(2,0,0,4,0,0);
+ }
+ #rect2 {
+	width: 400px;
+	height: 200px;
+	background-color: pink;
+	border: 1px solid black;
+ }
+
+ #ad-container {
+    height: 32px;
+    margin: 10px;
+    clear: both;
+    overflow: hidden;
+	position: relative;
+ }
+ #ad-container ul#ad-scroll {
+	list-style: none;
+	margin:0;
+/*	transition: top 1s ease-in;*/
+	position: absolute;
+	top: 0;
+ }
+ ul#ad-scroll li {
+	line-height: 32px;
+ }
+ .text {
+	font-size: 16px;
+ }
+ .text #textCtn {
+	/*
+	letter-spacing: 2px;
+    display: inline-block;
+    text-align: center;
+	padding: 3px;
+	*/
+ }
+ #textResCtn,#resCtn {
+	text-align: center;
+ }
+ #textRes {
+	display: inline-block;
+	width: 120px;
+	height: 120px;
+	overflow: hidden;
+	text-align:center;
+	background-color: aqua;
+ }
+ #resText {
+	display: flex;
+	flex-direction: column;
+	width: 120px;
+	height: 120px;
+	text-align:center;
+	background-color: aqua;
+	justify-content: space-around;
+ }
+</style>
+<script src="jquery-3.2.1.js"></script>
+<div class="text">
+	<textarea id="textCtn" rows="20" cols="60">北京灵异故事</textarea>
+</div>
+<button id="btn">点击我</button>
+
+<div id="textResCtn">
+<div id="textRes"></div>
+</div>
+<hr>
+<div id="resCtn">
+<div id="resText"></div>
+</div>
+<script>
+	var ctnWidth = 120,
+		ctnHeight = 120,
+		fontSize = 16,
+		lineHeight = fontSize,
+		letterSpacing = 1,
+		fontFamily = "KaiTi";
+	function splitMultiSpan(node) {
+		var localarr = [],tmpstr="";
+		var localnode = node.cloneNode();
+		localnode.innerText = "";
+		document.body.appendChild(localnode);
+		var text = node.innerText;
+		console.log(text);
+		var textarr = text.split("");
+		for(var j=0; j < textarr.length; j++) {
+			localnode.innerText += textarr[j];
+			if(localnode.offsetHeight>16) {
+				j--;
+				console.log('break point:'+j);
+				localarr.push(tmpstr);
+				tmpstr = '';
+				localnode.innerText = ''; //清空临时span的文字
+				continue;
+			} else {
+				tmpstr += textarr[j];
+			}
+		}
+		localarr.push(tmpstr);
+		console.log('split multi lines:');
+		console.log(localarr);
+		return localarr;
+	}
+	var btn = document.getElementById("btn");
+	btn.addEventListener("click",showText);
+	function showText() {
+		var textCtn = document.getElementById("textCtn");
+		var str = textCtn.value;
+		console.log(str);
+		var strarr = str.split("\n");
+		console.log(strarr);
+		
+		var strnewarr = [];
+		//创建临时的标签用于试验
+		var aspan = document.createElement("span");
+		aspan.className = "aspan testspan";
+		aspan.style.display = "inline-block";
+		aspan.style.maxWidth = "120px";
+		aspan.style.lineHeight = "1";
+		aspan.style.letterSpacing = letterSpacing;
+		aspan.style.fontFamily = fontFamily;
+		document.body.appendChild(aspan);
+		var tmpnode;
+		for(var j = 0; j < strarr.length; j++) {
+			aspan.innerText = strarr[j];
+			if(aspan.offsetHeight > 16) {
+				console.log("multi lines");
+				strnewarr = strnewarr.concat(splitMultiSpan(aspan));
+			} else {
+				console.log("one line");
+				tmpnode = aspan.cloneNode(true);
+				strnewarr.push(tmpnode.innerText);
+			}
+		}
+		console.log("all lines are");
+		console.log(strnewarr);
+		
+		//计算最多能容纳多少行
+		var maxLineNum = Math.floor(ctnHeight/lineHeight);
+		console.log("maxLineNum=",maxLineNum);
+		var lineNum = maxLineNum>strnewarr.length?strnewarr.length:maxLineNum;
+		var resText = document.getElementById("resText");
+		resText.innerText = "";
+		//平均分配构成预览样式
+		for(var k=0; k<lineNum; k++) {
+			var anewspan = document.createElement("span");
+			anewspan.className = "aspan testspan";
+		//	anewspan.style.display = "inline-block";
+			anewspan.style.maxWidth = ctnWidth + "px";
+			anewspan.innerText = strnewarr[k];
+			anewspan.style.lineHeight = "1";
+			anewspan.style.fontFamily = fontFamily;
+			resText.appendChild(anewspan);
+		}
+		//生成间隔数值
+		var deltaAll = ctnHeight - lineNum*lineHeight;
+		console.log('deltaAll='+deltaAll);
+		var deltaEach = deltaAll/(lineNum+1);
+		console.log('deltaEach='+deltaEach);
+		
+		/*
+		var span;
+		var textRes = document.getElementById("textRes");
+		textRes.innerHTML = "";
+		for(var i=0; i < strarr.length; i++) {
+			span = document.createElement("span");
+			if(i==1) {
+				span.className = "each-line test-line";
+			} else {
+				span.className = "each-line";
+			}
+			span.style.display = "block";
+			span.style.lineHeight = "1";
+			span.innerHTML = strarr[i];
+			textRes.appendChild(span);
+		}
+		
+		var testSpan = $(".test-line");
+		var texts = testSpan.text();
+		//console.log(texts);
+		var textsa = texts.split("");
+		console.log(textsa);
+		*/
+		
+		/*
+		str = str.join("<br>");
+		console.log(str);
+		var textRes = document.getElementById("textRes");
+		textRes.innerHTML = str;
+		*/
+	}
+	
+</script>
+<div id="rect1"></div>
+<div id="rect2"></div>
+<div id="ad-container">
+	<ul id="ad-scroll">
+		<li>1111111</li>
+		<li>2222222</li>
+		<li>3333333</li>
+		<li>4444444</li>
+		<li>5555555</li>
+	</ul>
+</div>
+<button id='animateBtn'>动画</button>
+<script>
+	
+	var ioffset = -32;
+	var btn = document.querySelector('#animateBtn');
+	var ul = document.getElementById('ad-scroll');
+	
+	var moveFn = (function() {
+		function moveStep(iTarget,oDiv,duration,cb) {
+			var timer = null;
+			function startMove(iTarget) {
+				clearInterval(timer);//关闭定时器，防止定时器叠加的问题
+				timer = setInterval(function(){
+					var speed = 0;
+					if(oDiv.offsetTop > iTarget) {
+						//当前值大于目标值
+						speed = -1;
+					} else {
+						speed = 1;
+					}
+					if(oDiv.offsetTop == iTarget) {
+						clearInterval(timer);
+						cb&&cb();
+					} else {
+						oDiv.style.top = oDiv.offsetTop + speed + 'px';
+					}
+				},duration);
+			}
+			startMove(iTarget);
+		}
+		var i = 0,cloneFlag = false,len = 0;;
+		function move(options) {
+			var timer = null;
+			var childs;
+			
+			if(!cloneFlag) {
+				childs = options.container.children;
+				if(!childs||childs.length===0) {
+					return;
+				}
+				len = childs.length;
+				options.container.appendChild(childs[0].cloneNode(true));
+				cloneFlag = true;
+			}
+			function _move() {
+				i++;
+				if(i<len) {
+					moveStep(options.offset*i,options.container, options.duration,function(){
+						console.log('one animate over');
+						clearTimeout(timer); timer = null;
+						timer = setTimeout(move,options.stayTime,options);
+					});
+				} else {
+					moveStep(options.offset*i,options.container, options.duration,function(){
+						console.log('reset i=0');
+						clearTimeout(timer); timer = null;
+						i=0;
+						options.container.style.top = 0;
+						timer = setTimeout(move,options.stayTime,options);
+					});
+				}
+			}
+			_move();
+		}
+		return move;
+	})();
+	
+	/*
+	setInterval(function(){
+		moveStep();
+	},2000);
+	*/
+	btn.addEventListener('click',function(){
+		moveFn({
+			container: ul,
+			duration: 30,
+			stayTime: 2000,
+			offset: ioffset
+		});
+	});
+</script>
+<script src="/personal/index.js"></script>
